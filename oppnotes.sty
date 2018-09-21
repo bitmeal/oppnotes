@@ -1,0 +1,44 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{oppnotes}[2014/07/26 oppnotes Package]
+
+
+\AtBeginDocument{%
+	\newwrite\commfile
+	\immediate\openout\commfile=\jobname.xml
+	\global\def\commpagebuffer{}
+	\global\def\commlastframe{0}
+	\global\def\commnote{}
+	\immediate\write\commfile{<notes>}
+}
+
+\AtEndDocument{%
+	\ifnum\commlastframe>0
+		\immediate\write\commfile{<note number="\commpagebuffer">}
+		\immediate\write\commfile{\commnote}
+		\immediate\write\commfile{</note>}
+	\fi
+	\immediate\write\commfile{</notes>}
+	\closeout\commfile
+}
+
+\newcommand{\oppnote}[1]{
+	\ifnum\commlastframe=\insertframenumber
+		\global\edef\commpagebuffer{\commpagebuffer ,\insertpagenumber}
+	\else%nicht gleich, neue seite
+		\ifnum\commlastframe>0
+			\immediate\write\commfile{<note number="\commpagebuffer">}
+			\immediate\write\commfile{\commnote}
+			\immediate\write\commfile{</note>}
+		\fi
+		\global\edef\commpagebuffer{\insertpagenumber}
+		\global\edef\commlastframe{\insertframenumber}
+	\fi
+	\catcode`\\=\active
+	\def\\{^^J}
+	\global\edef\commnote{#1}
+}
+
+
+
+
+\endinput
